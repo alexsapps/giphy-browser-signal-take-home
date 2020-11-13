@@ -1,0 +1,17 @@
+.resultsView {
+    max-width: 1200px;  /* For ease of vertical scanning. */
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.gifsCollection {
+    display: flex;
+    align-content: space-between;
+    align-items: flex-start;
+    flex-wrap: wrap;
+    justify-content: center;
+}
+
+.gif {
+    margin: 20px;
+}
