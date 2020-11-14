@@ -16,16 +16,6 @@ export function useInfiniteScrolling(
     containerRef: React.RefObject<HTMLElement>, scrollElement: HTMLElement,
     loadMoreCallback: () => void) {
 
-    // TODO: write tests
-    function shouldFetchMore(scrollHeight: number,
-        scrollTop: number,
-        clientHeight: number,
-        loadWhenRemainingScrollLessThan: number
-    ) {
-        const remainingScrollHeight = scrollHeight - scrollTop - clientHeight;
-        return remainingScrollHeight < loadWhenRemainingScrollLessThan;
-    }
-
     function requestMoreGifsIfNeeded() {
         if (shouldFetchMore(
             scrollElement.scrollHeight,
@@ -79,4 +69,14 @@ export function useInfiniteScrolling(
     useEffect(() => {
         requestMoreGifsIfNeeded();
     });
+}
+
+// Exported for testing only to avoid complex mocking.
+export function shouldFetchMore(scrollHeight: number,
+    scrollTop: number,
+    clientHeight: number,
+    loadWhenRemainingScrollLessThan: number
+) {
+    const remainingScrollHeight = scrollHeight - scrollTop - clientHeight;
+    return remainingScrollHeight < loadWhenRemainingScrollLessThan;
 }

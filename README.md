@@ -2,39 +2,38 @@
 
 ## Remaining work
 
+- Unit test React components (Redux slices, Giphy API wrapper are unit tested), and integration smoke test
 - `useInfiniteScrolling` needs to be simplified and verified for correctness in detecting when to load more images. Most
   importantly, must always fire when there are changes to any of the variables in the calculation to avoid erroneously
   indicating the end of results. For reusability, should work in `overflow:scroll` elements (not just `window`).
-- Filter duplicate images across requests. Perhaps between requests, a popular trending gif would lower the rank of the
-  rest of the gifs, meaning that on a subsequent request the first image served would be the same as the
-  last image from the previous request.
-- Optimize Redux selectors
+- Filter duplicate images across requests. An image might appear twice in search results when they are reordered in rank
+  during the time in between requests; for example, an image that suddenly becomes the most popular trending image may
+  cause the last image of the previous request to be the first one served on the next request.
+- Use browser navigation to access previous searches
+- Consider optimizing Redux selectors if performance tests are poor on mobile
 - Scale full screen original image down if it doesn't fit on the screen, especially for mobile
 - Reduce margins when screen size is small so multiple columns will display on mobile
 - Disable scrolling while in full screen mode
 - Automatic retries when failing to fetch from Giphy
 - Ensure network requests have timeouts
-- Move scroll & resize detection code into a higher-order component so the infinite gif scroller can focus on displaying gifs
-- Cancel network requests when query changes
-- Make lower-level components reusable by not tying them to absolute paths in the global redux state
-- Integration smoke test
-- Accessibility
-- Fix atrocious aesthetics
-- Use browser navigation to access previous searches
+- Cancel rather than ignore pending network requests when query changes
+- Make lower-level components reusable by not tying them to absolute paths in the global redux state (if that's possible
+  idiomatically for Redux apps)
+- Accessibility, dark theme
+- Make images stack vertically independently of other columns, rather than align in a grid, as the official Giphy
+  website does
 - Add button to clear search box and go back to trending view
 - Pin search box to top of screen
 - Add button to scroll to top
 - Add button to copy link to current gif
-- Make an app icon
-- Add CSS animations
-- Cache recent searches
+- Add branding, CSS animations, fix atrocious aesthetics
+- Cache recent searches, button to save images for offline access
+- Progressive web app for native feel and better offline access of cached content
 - Predictive autofill for search
 - Add sharing features
 - Support for other Giphy media types
 - Allow bookmarking / favoriting particular gifs
-- Progressive web app for native feel and better offline access of cached content
-- Support other languages
-- Dark theme
+- Support other spoken languages
 
 ## Development
 

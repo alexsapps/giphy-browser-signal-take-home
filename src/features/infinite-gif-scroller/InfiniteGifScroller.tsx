@@ -9,11 +9,6 @@ import { useInfiniteScrolling } from './useInfiniteScrolling';
 /**
  * Component for infinite scrolling through images.
  * 
- * When the component is not overflowing with images or when the user scrolls
- * near the bottom, the component sends a request for more images. The component
- * will wait for more images to arrive before sending another request. When
- * images arrive, it may immediately request more images again if needed.
- * 
  * The component accepts a "scrollElement" prop which must be set to the nearest
  * ancestor HTML element that scrolls when its content overflows. This is the
  * element that the user will scroll in as this component grows its height

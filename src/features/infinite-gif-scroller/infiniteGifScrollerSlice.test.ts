@@ -3,8 +3,8 @@ import thunk from 'redux-thunk';
 import { GIF } from '../../app/gifType';
 import * as GiphyApi from '../../app/giphyApi';
 import { AppDispatch, RootState } from '../../app/store';
-import Reducer, { fetchGifsAsync, selectGifs, selectErrorLoadingGifs, selectIsLoading } from './infiniteGifScrollerSlice';
-import { AnyAction, SerializedError } from '@reduxjs/toolkit';
+import Reducer, { fetchGifsAsync, selectGifs, selectErrorLoadingGifs, selectIsLoading, selectIsMore } from './infiniteGifScrollerSlice';
+import { AnyAction } from '@reduxjs/toolkit';
 import { setQuery } from '../search-box/searchBarSlice';
 
 type InfiniteGifScrollerState = NonNullable<Parameters<typeof Reducer>[0]>;
@@ -15,11 +15,12 @@ const middlewares = [thunk];
 const mockStore = configureMockStore<RootState, AppDispatch>(middlewares);
 
 describe('infiniteGifScrollerSlice', () => {
-    function makeGif(): GIF {
+    function makeGif(args?: {id?: string, title?: string}): GIF {
+        const id = args?.id ?? '1';
         return {
-            id: '1',
+            id,
             webpage: '',
-            title: 'gif1',
+            title: args?.title ?? 'gif' + id,
             fixedWidthImage: {
                 url: 'fixed_url',
                 width: 100,
@@ -35,11 +36,11 @@ describe('infiniteGifScrollerSlice', () => {
 
     function makeGifState(args: { gifs?: GIF[], error?: Error | null, isLoading?: boolean, isMore?: boolean }): InfiniteGifScrollerState {
         return {
-            error: args.error || null,
-            gifs: args.gifs || [],
+            error: args.error ?? null,
+            gifs: args.gifs ?? [],
             gifIndex: {},
-            isLoading: args.isLoading === undefined ? false : args.isLoading, 
-            isMore: args.isMore === undefined ? true : args.isMore,
+            isLoading: args.isLoading ?? false, 
+            isMore: args.isMore ?? true,
             loadingRequestId: ''
         };
     }
@@ -95,8 +96,7 @@ describe('infiniteGifScrollerSlice', () => {
             prepareStateForAction(initialState, action);
             const actualState = Reducer(initialState, action);
 
-            expect(actualState.error).toBeTruthy();
-            expect(actualState.error!.message).toEqual('Error');
+            expect(actualState.error?.message).toEqual('Error');
         });
 
         test('clears error on loading', () => {
@@ -112,9 +112,7 @@ describe('infiniteGifScrollerSlice', () => {
         test('sets gifs', () => {
             const initialState = makeGifState({});
 
-            const gif1 = makeGif(), gif2 = makeGif();
-            gif1.id = '1';
-            gif2.id = '2';
+            const gif1 = makeGif({id: '1'}), gif2 = makeGif({id: '2'});
             const response: GiphyApi.GIFsResponse = {
                 gifs: [gif1, gif2],
                 isMore: true,
@@ -123,9 +121,7 @@ describe('infiniteGifScrollerSlice', () => {
             prepareStateForAction(initialState, action);
             const actualState = Reducer(initialState, action);
 
-            expect(actualState.gifs.length).toBe(2);
-            expect(actualState.gifs[0].id).toBe(gif1.id);
-            expect(actualState.gifs[1].id).toBe(gif2.id);
+            expect(actualState.gifs).toEqual([gif1, gif2]);
         });
 
         test('sets isMore', () => {
@@ -160,8 +156,7 @@ describe('infiniteGifScrollerSlice', () => {
             const gif1 = makeGif();
             const initialState = makeGifState({gifs: [gif1]});
 
-            const gif2 = makeGif();
-            gif2.id = '2';
+            const gif2 = makeGif({id: '2'});
             const response: GiphyApi.GIFsResponse = {
                 gifs: [gif2],
                 isMore: false,
@@ -170,17 +165,13 @@ describe('infiniteGifScrollerSlice', () => {
             prepareStateForAction(initialState, action);
             const actualState = Reducer(initialState, action);
 
-            expect(actualState.gifs.length).toBe(2);
-            expect(actualState.gifs[0].id).toBe(gif1.id);
-            expect(actualState.gifs[1].id).toBe(gif2.id);
+            expect(actualState.gifs).toEqual([gif1, gif2]);
         });
 
         test('populates index for first request', () => {
             const initialState = makeGifState({});
 
-            const gif1 = makeGif(), gif2 = makeGif();
-            gif1.id = '1';
-            gif2.id = '2';
+            const gif1 = makeGif({id: '1'}), gif2 = makeGif({id: '2'});
             const response: GiphyApi.GIFsResponse = {
                 gifs: [gif1, gif2],
                 isMore: true,
@@ -194,13 +185,10 @@ describe('infiniteGifScrollerSlice', () => {
         });
 
         test('populates index for subsequent request', () => {
-            const gif1 = makeGif();
-            gif1.id = '1';
+            const gif1 = makeGif({id: '1'});
             const initialState = makeGifState({gifs: [gif1]});
 
-            const gif2 = makeGif(), gif3 = makeGif();
-            gif2.id = '2';
-            gif3.id = '3';
+            const gif2 = makeGif({id: '2'}), gif3 = makeGif({id: '3'});
             const response: GiphyApi.GIFsResponse = {
                 gifs: [gif2, gif3],
                 isMore: false,
@@ -224,12 +212,15 @@ describe('infiniteGifScrollerSlice', () => {
             const action = setQuery("query");
             const actualState = Reducer(initialState, action);
 
-            expect(actualState.gifs.length).toBe(0);
-            expect(actualState.error).toBe(null);
-            expect(actualState.gifIndex['test']).toBeUndefined();
-            expect(actualState.isLoading).toBe(false);
-            expect(actualState.loadingRequestId).toBe('');
-            expect(actualState.isMore).toBe(true);
+            const expectedState: InfiniteGifScrollerState = {
+                gifs: [],
+                error: null,
+                gifIndex: {},
+                isLoading: false,
+                loadingRequestId: '',
+                isMore: true,
+            };
+            expect(actualState).toEqual(expectedState);
         });
 
         test('ignores fulfilled request when query has changed since', () => {
@@ -264,31 +255,38 @@ describe('infiniteGifScrollerSlice', () => {
     describe('selectors', () => {
         describe('selectGifs', () => {
             test('selects gifs', () => {
-
+                const gifs = [makeGif()];
+                const state = makeGifState({gifs});
+                expect(selectGifs.resultFunc(state)).toEqual(gifs);
             });
         });
 
         describe('selectErrorLoadingGifs', () => {
             test('selects error', () => {
-
+                const state = makeGifState({error: {name: 'Error', message: 'Message'}});
+                expect(selectErrorLoadingGifs.resultFunc(state)?.message).toBe('Message');
             });
         });
 
         describe('selectIsLoading', () => {
             test('detects loading', () => {
-
+                const state = makeGifState({isLoading: true});
+                expect(selectIsLoading.resultFunc(state)).toBe(true);
             });
             test('detects not loading', () => {
-
+                const state = makeGifState({isLoading: false});
+                expect(selectIsLoading.resultFunc(state)).toBe(false);
             });
         });
 
         describe('selectIsMore', () => {
             test('detects more', () => {
-
+                const state = makeGifState({isMore: true});
+                expect(selectIsMore.resultFunc(state)).toBe(true);
             });
             test('detects no more', () => {
-
+                const state = makeGifState({isMore: false});
+                expect(selectIsMore.resultFunc(state)).toBe(false);
             });
         });
     });

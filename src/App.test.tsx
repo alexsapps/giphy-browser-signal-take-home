@@ -10,8 +10,4 @@ test('smoke test', () => {
       <App />
     </Provider>
   );
-
-  // expect(getByText(/learn/i)).toBeInTheDocument();
 });
-
-// TODO write tests

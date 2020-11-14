@@ -55,7 +55,6 @@ export const infiniteGifScrollerSlice = createSlice({
             state.isLoading = false;
             state.loadingRequestId = '';
 
-            // TODO: test
             for (let i = 0; i < gifs.length; i++) {
                 state.gifIndex[gifs[i].id] =
                     state.gifs.length - gifs.length + i;
@@ -64,7 +63,10 @@ export const infiniteGifScrollerSlice = createSlice({
         builder.addCase(fetchGifsAsync.rejected, (state, action) => {
             if (action.meta.requestId !== state.loadingRequestId) return;
 
-            console.error(action.error);
+            if (!navigator.userAgent.includes("jsdom")) {
+                console.error(action.error);
+            }
+
             state.error = action.error;
             state.isLoading = false;
             state.loadingRequestId = '';

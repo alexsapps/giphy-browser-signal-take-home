@@ -3,6 +3,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { closeFullScreen, selectFullScreenGifId } from './fullScreenGifSlice';
 import styles from './FullScreenGif.module.css';
 import { RootState } from '../../app/store';
+import { FullScreen } from './FullScreen';
 
 function selectGifFromId(gifId: string) {
     return (state: RootState) => {
@@ -30,10 +31,12 @@ export function FullScreenGif() {
     }
 
     return (
-        <div className={styles.fullScreenOverlay} onClick={onClick}>
-            <div style={containerStyle}>
-                <img src={gifImage.url} style={imageStyle} alt={gif.title} />
+        <FullScreen onClick={onClick}>
+            <div className={styles.centerOnScreen}>
+                <div style={containerStyle}>
+                    <img src={gifImage.url} style={imageStyle} alt={gif.title} />
+                </div>
             </div>
-        </div>
+        </FullScreen>
     );
 }

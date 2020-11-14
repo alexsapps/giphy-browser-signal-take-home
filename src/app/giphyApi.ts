@@ -14,7 +14,6 @@ export type GIFsResponse = {
  * @param query Search query. If empty, trending gifs are fetched.
  * @param offset Offset to start searching.
  */
-// TODO: add tests
 export async function fetchGifsFromGiphy(query: string, offset: number): Promise<GIFsResponse> {
     let endpoint = 'https://api.giphy.com/v1/gifs/trending';
     if (query !== '') {
@@ -47,8 +46,9 @@ export async function fetchGifsFromGiphy(query: string, offset: number): Promise
                 // This actually happens.
                 throw new Error("Giphy isn't working right now.");
             }
-
-            const isMore = response.pagination.offset + response.pagination.count < response.pagination.total_count;
+            
+            const {offset, count, total_count} = response.pagination;
+            const isMore = offset + count < total_count;
             const gifs = (response.data as GiphyGIFObject[]).map(GiphyGifToCustomObject);
             return { gifs, isMore };
         });
