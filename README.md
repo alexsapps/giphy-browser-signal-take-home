@@ -6,10 +6,13 @@
 - `useInfiniteScrolling` needs to be simplified and verified for correctness in detecting when to load more images. Most
   importantly, must always fire when there are changes to any of the variables in the calculation to avoid erroneously
   indicating the end of results. For reusability, should work in `overflow:scroll` elements (not just `window`).
+  Consider using the IntersectionObserver Web API.
 - Filter duplicate images across requests. An image might appear twice in search results when they are reordered in rank
   during the time in between requests; for example, an image that suddenly becomes the most popular trending image may
   cause the last image of the previous request to be the first one served on the next request.
 - Use browser navigation to access previous searches
+- Consider temporarily removing items from the DOM when scrolling down far to prevent too many DOM nodes being loaded
+  in the document, if performance tests indicate this is necessary.
 - Consider optimizing Redux selectors if performance tests are poor on mobile
 - Scale full screen original image down if it doesn't fit on the screen, especially for mobile
 - Reduce margins when screen size is small so multiple columns will display on mobile
